@@ -3,12 +3,41 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useTheme } from './ThemeProvider';
 
 const Navigation = () => {
   const pathname = usePathname();
   const [openDropdown, setOpenDropdown] = useState(null);
-  const { theme, toggleTheme } = useTheme();
+  // Remove the useTheme hook reference
+  const [theme, setTheme] = useState(() => {
+    // Default to light theme
+    return 'light';
+  });
+
+  // Simple toggle function that doesn't depend on the ThemeProvider
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    // Apply the theme class to the document
+    document.documentElement.classList.toggle('dark');
+    // Store the preference
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('theme', newTheme);
+    }
+  };
+
+  // Initialize theme from localStorage on mount
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedTheme = localStorage.getItem('theme');
+      if (storedTheme) {
+        setTheme(storedTheme);
+        document.documentElement.classList.toggle('dark', storedTheme === 'dark');
+      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        setTheme('dark');
+        document.documentElement.classList.add('dark');
+      }
+    }
+  }, []);
 
   const toggleDropdown = (dropdown) => {
     setOpenDropdown(openDropdown === dropdown ? null : dropdown);
@@ -55,7 +84,7 @@ const Navigation = () => {
                 <button
                   className={`px-3 py-2 w-full md:w-auto text-left flex justify-between items-center rounded hover:text-primary-500 dark:hover:text-primary-400 transition-colors ${
                     openDropdown === item.label ? 'bg-primary-50 dark:bg-primary-900/40' : ''
-                  } ${isActive(item.path) ? 'text-primary-500 dark:text-primary-400 font-medium' : 'text-text-secondary dark:text-text-light/70'}`}
+                  } ${isActive(item.path) ? 'text-primary-500 dark:text-primary-400 font-medium' : 'text-text-secondary dark:text-gray-300'}`}
                   onClick={() => toggleDropdown(item.label)}
                 >
                   <span>{item.label}</span>
@@ -77,7 +106,7 @@ const Navigation = () => {
                         key={dropdownItem.label}
                         href={dropdownItem.path}
                         className={`block px-4 py-2 hover:bg-primary-50 dark:hover:bg-primary-700 transition-colors ${
-                          isActive(dropdownItem.path) ? 'text-primary-500 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/40 font-medium' : 'text-text-secondary dark:text-text-light/70'
+                          isActive(dropdownItem.path) ? 'text-primary-500 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/40 font-medium' : 'text-text-secondary dark:text-gray-300'
                         }`}
                         onClick={() => setOpenDropdown(null)}
                       >
@@ -91,7 +120,7 @@ const Navigation = () => {
               <Link
                 href={item.path}
                 className={`block px-3 py-2 rounded transition-colors hover:text-primary-500 dark:hover:text-primary-400 ${
-                  isActive(item.path) ? 'text-primary-500 dark:text-primary-400 font-medium' : 'text-text-secondary dark:text-text-light/70'
+                  isActive(item.path) ? 'text-primary-500 dark:text-primary-400 font-medium' : 'text-text-secondary dark:text-gray-300'
                 }`}
               >
                 {item.label}
@@ -104,7 +133,7 @@ const Navigation = () => {
       {/* Theme toggle button */}
       <button 
         onClick={toggleTheme}
-        className="p-2 rounded-full hover:bg-primary-50 dark:hover:bg-primary-900/40 text-text-secondary dark:text-text-light/70 hover:text-primary-500 dark:hover:text-primary-400 transition-colors"
+        className="p-2 rounded-full hover:bg-primary-50 dark:hover:bg-primary-900/40 text-text-secondary dark:text-gray-300 hover:text-primary-500 dark:hover:text-primary-400 transition-colors"
         aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
       >
         {theme === 'dark' ? (

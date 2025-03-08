@@ -17,7 +17,7 @@ export default function HomePage() {
               alt="Monster Hunter Wilds"
               fill
               className="object-cover"
-              priority
+              priority="true"
               fallbackSrc="https://placehold.co/1920x1080?text=Monster+Hunter+Wilds"
             />
           </div>
