@@ -3,10 +3,12 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTheme } from './ThemeProvider';
 
 const Navigation = () => {
   const pathname = usePathname();
   const [openDropdown, setOpenDropdown] = useState(null);
+  const { theme, toggleTheme } = useTheme();
 
   const toggleDropdown = (dropdown) => {
     setOpenDropdown(openDropdown === dropdown ? null : dropdown);
@@ -44,58 +46,78 @@ const Navigation = () => {
   };
 
   return (
-    <ul className="flex flex-wrap md:flex-nowrap space-x-0 md:space-x-4">
-      {navItems.map((item) => (
-        <li key={item.label} className="relative group w-full md:w-auto">
-          {item.dropdown ? (
-            <>
-              <button
-                className={`px-3 py-2 w-full md:w-auto text-left flex justify-between items-center rounded hover:bg-gray-700 transition-colors ${
-                  openDropdown === item.label ? 'bg-gray-700' : ''
-                }`}
-                onClick={() => toggleDropdown(item.label)}
-              >
-                <span>{item.label}</span>
-                <svg 
-                  className={`w-4 h-4 ml-1 transition-transform ${openDropdown === item.label ? 'rotate-180' : ''}`} 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24" 
-                  xmlns="http://www.w3.org/2000/svg"
+    <div className="flex flex-wrap md:flex-nowrap items-center space-x-0 md:space-x-4">
+      <ul className="flex flex-wrap md:flex-nowrap space-x-0 md:space-x-4">
+        {navItems.map((item) => (
+          <li key={item.label} className="relative group w-full md:w-auto">
+            {item.dropdown ? (
+              <>
+                <button
+                  className={`px-3 py-2 w-full md:w-auto text-left flex justify-between items-center rounded hover:text-primary-500 dark:hover:text-primary-400 transition-colors ${
+                    openDropdown === item.label ? 'bg-primary-50 dark:bg-primary-900/40' : ''
+                  } ${isActive(item.path) ? 'text-primary-500 dark:text-primary-400 font-medium' : 'text-text-secondary dark:text-text-light/70'}`}
+                  onClick={() => toggleDropdown(item.label)}
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              
-              {openDropdown === item.label && (
-                <div className="absolute left-0 mt-1 w-full md:w-48 bg-gray-800 rounded-lg shadow-lg overflow-hidden z-50">
-                  {item.dropdown.map((dropdownItem) => (
-                    <Link
-                      key={dropdownItem.label}
-                      href={dropdownItem.path}
-                      className={`block px-4 py-2 hover:bg-gray-700 transition-colors ${
-                        isActive(dropdownItem.path) ? 'bg-gray-700 text-yellow-400' : 'text-gray-200'
-                      }`}
-                    >
-                      {dropdownItem.label}
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </>
-          ) : (
-            <Link
-              href={item.path}
-              className={`block px-3 py-2 rounded transition-colors hover:bg-gray-700 ${
-                isActive(item.path) ? 'text-yellow-400' : 'text-gray-200'
-              }`}
-            >
-              {item.label}
-            </Link>
-          )}
-        </li>
-      ))}
-    </ul>
+                  <span>{item.label}</span>
+                  <svg 
+                    className={`w-4 h-4 ml-1 transition-transform ${openDropdown === item.label ? 'rotate-180' : ''}`} 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24" 
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                {openDropdown === item.label && (
+                  <div className="absolute left-0 mt-1 w-full md:w-48 bg-white dark:bg-primary-800 rounded-lg shadow-lg overflow-hidden z-50 border border-border-light dark:border-primary-700">
+                    {item.dropdown.map((dropdownItem) => (
+                      <Link
+                        key={dropdownItem.label}
+                        href={dropdownItem.path}
+                        className={`block px-4 py-2 hover:bg-primary-50 dark:hover:bg-primary-700 transition-colors ${
+                          isActive(dropdownItem.path) ? 'text-primary-500 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/40 font-medium' : 'text-text-secondary dark:text-text-light/70'
+                        }`}
+                        onClick={() => setOpenDropdown(null)}
+                      >
+                        {dropdownItem.label}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </>
+            ) : (
+              <Link
+                href={item.path}
+                className={`block px-3 py-2 rounded transition-colors hover:text-primary-500 dark:hover:text-primary-400 ${
+                  isActive(item.path) ? 'text-primary-500 dark:text-primary-400 font-medium' : 'text-text-secondary dark:text-text-light/70'
+                }`}
+              >
+                {item.label}
+              </Link>
+            )}
+          </li>
+        ))}
+      </ul>
+      
+      {/* Theme toggle button */}
+      <button 
+        onClick={toggleTheme}
+        className="p-2 rounded-full hover:bg-primary-50 dark:hover:bg-primary-900/40 text-text-secondary dark:text-text-light/70 hover:text-primary-500 dark:hover:text-primary-400 transition-colors"
+        aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+      >
+        {theme === 'dark' ? (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        )}
+      </button>
+    </div>
   );
 };
 
